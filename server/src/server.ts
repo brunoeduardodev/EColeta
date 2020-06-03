@@ -1,11 +1,13 @@
-import express from "express";
+import express from 'express'
+import routes from './routes'
+import cors from 'cors'
 
-const app = express();
+const app = express()
 
-app.get("/helloworld", (_, res) => {
-  res.send("Deu certo!");
-});
+app.use(express.json())
+app.use(routes)
+app.use(cors())
 
-console.log("Iniciado");
+console.log('Iniciado')
 
-app.listen(3333);
+app.listen(3333)
