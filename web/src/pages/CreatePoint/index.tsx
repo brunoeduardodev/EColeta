@@ -104,7 +104,7 @@ const CreatePoint = () => {
       await api.post("points", dataToSend);
 
       setShowModal(true);
-      setInterval(() => {
+      setTimeout(() => {
         history.push("/");
         setShowModal(false);
       }, 2000);

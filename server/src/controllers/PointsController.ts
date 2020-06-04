@@ -11,9 +11,9 @@ class PointsController {
 
     const points = await knex('points')
       .join('point_items', 'points.id', '=', 'point_items.point_id')
+      .where('points.city', String(city))
+      .where('points.uf', String(uf))
       .whereIn('point_items.item_id', parsedItems)
-      .where('city', String(city))
-      .where('uf', String(uf))
       .distinct()
       .select('points.*')
 
@@ -24,7 +24,7 @@ class PointsController {
     const id = Number(req.params.id)
     const point = await knex('points').select('*').where('id', id).first()
 
-    if (!point) return res.json({ message: 'Point not found' })
+    if (!point) return res.status(404).json({ message: 'Point not found' })
 
     const items = await knex('items')
       .join('point_items', 'items.id', '=', 'point_items.item_id')
