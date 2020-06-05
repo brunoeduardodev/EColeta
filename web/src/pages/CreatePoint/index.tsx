@@ -2,9 +2,8 @@ import React, { useState, useEffect, useCallback, ChangeEvent, FormEvent } from 
 import { Link, useHistory } from "react-router-dom";
 import { FiArrowLeft, FiCheckCircle } from "react-icons/fi";
 import { Map, TileLayer, Marker } from "react-leaflet";
-
 import api from "../../services/api";
-
+import Dropzone from "./Dropzone";
 import "./styles.css";
 import logo from "../../assets/logo.svg";
 
@@ -33,6 +32,7 @@ const CreatePoint = () => {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [formData, setFormData] = useState({ name: "", email: "", whatsapp: "" });
   const [showModal, setShowModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File>();
   const history = useHistory();
 
   const handleMapClick = useCallback(({ latlng }) => {
@@ -89,19 +89,19 @@ const CreatePoint = () => {
       event.preventDefault();
 
       const { name, email, whatsapp } = formData;
+      const data = new FormData();
 
-      const dataToSend = {
-        name,
-        email,
-        whatsapp,
-        latitude: position.lat,
-        longitude: position.lng,
-        city: selectedCity,
-        uf: selectedUf.sigla,
-        items: selectedItems,
-      };
+      data.append("name", name);
+      data.append("email", email);
+      data.append("whatsapp", whatsapp);
+      data.append("latitude", String(position.lat));
+      data.append("longitude", String(position.lng));
+      data.append("city", selectedCity);
+      data.append("uf", selectedUf.sigla);
+      data.append("items", selectedItems.join(","));
+      if (selectedFile) data.append("image", selectedFile);
 
-      await api.post("points", dataToSend);
+      await api.post("points", data);
 
       setShowModal(true);
       setTimeout(() => {
@@ -109,7 +109,7 @@ const CreatePoint = () => {
         setShowModal(false);
       }, 2000);
     },
-    [formData, position, selectedCity, selectedUf, selectedItems, history]
+    [formData, position, selectedCity, selectedUf, selectedItems, history, selectedFile]
   );
 
   useEffect(() => {
@@ -145,13 +145,14 @@ const CreatePoint = () => {
 
     getCities();
   }, [selectedUf]);
-
+  console.log(selectedFile);
   return (
     <>
       <div className={showModal ? "show" : "none"} id="created-point">
         <FiCheckCircle />
         <h1>Cadastro concluído!</h1>
       </div>
+
       <div id="page-create-point">
         <header>
           <img src={logo} alt="Ecoleta" />
@@ -166,7 +167,7 @@ const CreatePoint = () => {
           <h1>
             Cadastro do <br /> ponto de coleta
           </h1>
-
+          <Dropzone onFileUploaded={setSelectedFile} />
           <fieldset>
             <legend>
               <h2>Dados</h2>
